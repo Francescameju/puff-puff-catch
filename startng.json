@@ -1,0 +1,8 @@
+{
+  "leaderboard": {
+    "stats": [
+      { "key": "puffs", "label": "Puff-puffs caught", "order": "highest" },
+      { "key": "streak", "label": "Best streak", "order": "highest" }
+    ]
+  }
+}

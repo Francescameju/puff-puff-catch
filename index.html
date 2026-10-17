@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Puff-Puff Catch</title>
+  <meta name="description" content="Catch hot puff-puff falling from the sky. Dodge the pepper. A start.ng game.">
+  <link rel="icon" href="cover.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- start.ng player card -->
+  <div class="startng-card" id="player-card" hidden>
+    <img id="player-face" alt="">
+    <div>
+      <b id="player-name"></b>
+      <span id="player-account"></span>
+    </div>
+    <button id="player-sign-in" hidden>Sign in</button>
+  </div>
+
+  <!-- score while playing -->
+  <div class="hud" id="hud" hidden>
+    <div class="hud-score"><span id="hud-score">0</span><small>puffs</small></div>
+    <div class="hud-row">
+      <span id="hud-lives"></span>
+      <span class="hud-streak">streak <b id="hud-streak">0</b></span>
+    </div>
+  </div>
+
+  <button class="mute" id="mute" aria-label="Sound on or off">🔊</button>
+
+  <!-- start screen -->
+  <section class="panel" id="start-panel">
+    <h1>Puff-Puff<br><span>Catch</span></h1>
+    <p class="lede">Mama's frying is flying! Catch every hot puff-puff before it hits the ground.</p>
+    <ul class="legend">
+      <li><i class="dot puff"></i> Puff-puff <b>+1</b></li>
+      <li><i class="dot gold"></i> Golden puff <b>+5</b></li>
+      <li><i class="dot pepper"></i> Pepper: <b>lose a life</b></li>
+    </ul>
+    <p class="controls">Move with ← → or A / D, or drag with your finger or mouse.</p>
+    <button class="big" id="play-btn">Play</button>
+    <div class="board-wrap">
+      <h2>Leaderboard</h2>
+      <ol class="board" id="board-start"><li class="muted">Loading…</li></ol>
+    </div>
+  </section>
+
+  <!-- game over screen -->
+  <section class="panel" id="over-panel" hidden>
+    <h1 class="over-title">Chop finish!</h1>
+    <div class="result">
+      <div><b id="final-puffs">0</b><small>puff-puffs</small></div>
+      <div><b id="final-streak">0</b><small>best streak</small></div>
+    </div>
+    <p class="save-msg" id="save-msg"></p>
+    <button class="big" id="again-btn">Play again</button>
+    <div class="board-wrap">
+      <h2>Leaderboard</h2>
+      <ol class="board" id="board-over"></ol>
+    </div>
+  </section>
+
+  <script src="startng.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
