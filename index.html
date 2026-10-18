@@ -24,6 +24,8 @@
   <!-- score while playing -->
   <div class="hud" id="hud" hidden>
     <div class="hud-score"><span id="hud-score">0</span><small>puffs</small></div>
+    <div class="hud-level" id="hud-level"></div>
+    <div class="hud-level">🪙 <span id="hud-coins">0</span></div>
     <div class="hud-row">
       <span id="hud-lives"></span>
       <span class="hud-streak">streak <b id="hud-streak">0</b></span>
@@ -41,14 +43,50 @@
       <li><i class="dot puff"></i> Puff-puff <b>+1</b></li>
       <li><i class="dot gold"></i> Golden puff <b>+5</b></li>
       <li><i class="dot pepper"></i> Pepper: <b>lose a life</b></li>
+      <li>🪙 Naira coins: <b>spend them in the shop</b></li>
+      <li>🧃 Juice: <b>get a heart back</b></li>
+
     </ul>
     <p class="controls">Move with ← → or A / D, or drag with your finger or mouse. Press Esc to stop.</p>
+    <p class="start-in">📍 Start in:</p>
+    <div class="city-picker" id="city-picker"></div>
     <button class="big" id="play-btn">Play</button>
+    <div><button class="shop-btn" id="shop-btn">🛍 Shop · 🪙 <span id="menu-coins">0</span></button></div>
     <a class="home-link" href="https://start.ng/">← More games on start.ng</a>
     <div class="board-wrap">
       <h2>Leaderboard</h2>
       <ol class="board" id="board-start"><li class="muted">Loading…</li></ol>
     </div>
+  </section>
+
+  <!-- shop -->
+  <section class="panel shop-panel" id="shop-panel" hidden>
+    <h1>Mama's Shop</h1>
+    <p class="wallet">You have 🪙 <b id="shop-coins">0</b> coins</p>
+    <h2 class="shop-h">Puff-puff flavours</h2>
+    <div id="shop-flavours"></div>
+    <h2 class="shop-h">Travel tickets</h2>
+    <p class="shop-note">Finish a city to unlock the next one for free, or buy a ticket to go straight there.</p>
+    <div id="shop-tickets"></div>
+    <button class="big" id="shop-back">Done</button>
+    <p class="shop-note">Coins are saved on this device.</p>
+  </section>
+
+  <!-- level story card -->
+  <section class="panel level-panel" id="level-panel" hidden>
+    <p class="level-num" id="level-num"></p>
+    <h1 id="level-name"></h1>
+    <div class="story">
+      <img id="level-face" alt="" hidden>
+      <div class="bubble">
+        <b id="level-who"></b>
+        <p id="level-story"></p>
+      </div>
+    </div>
+    <p class="level-goal" id="level-goal"></p>
+    <p class="level-bonus" id="level-bonus" hidden>❤️ Mama gave you an extra life!</p>
+    <p class="level-coins" id="level-coins" hidden></p>
+    <button class="big" id="level-go">Let's go!</button>
   </section>
 
   <!-- game over screen -->
@@ -57,7 +95,9 @@
     <div class="result">
       <div><b id="final-puffs">0</b><small>puff-puffs</small></div>
       <div><b id="final-streak">0</b><small>best streak</small></div>
+      <div><b id="final-level">1</b><small>level</small></div>
     </div>
+    <p class="final-city" id="final-city"></p>
     <p class="save-msg" id="save-msg"></p>
     <button class="big" id="again-btn">Play again</button>
     <div><button class="link-btn" id="menu-btn">Back to menu</button></div>
