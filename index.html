@@ -31,6 +31,7 @@
   </div>
 
   <button class="mute" id="mute" aria-label="Sound on or off">🔊</button>
+  <button class="quit" id="quit-btn" hidden aria-label="Back to menu">☰ Menu</button>
 
   <!-- start screen -->
   <section class="panel" id="start-panel">
@@ -41,8 +42,9 @@
       <li><i class="dot gold"></i> Golden puff <b>+5</b></li>
       <li><i class="dot pepper"></i> Pepper: <b>lose a life</b></li>
     </ul>
-    <p class="controls">Move with ← → or A / D, or drag with your finger or mouse.</p>
+    <p class="controls">Move with ← → or A / D, or drag with your finger or mouse. Press Esc to stop.</p>
     <button class="big" id="play-btn">Play</button>
+    <a class="home-link" href="https://start.ng/">← More games on start.ng</a>
     <div class="board-wrap">
       <h2>Leaderboard</h2>
       <ol class="board" id="board-start"><li class="muted">Loading…</li></ol>
@@ -58,6 +60,7 @@
     </div>
     <p class="save-msg" id="save-msg"></p>
     <button class="big" id="again-btn">Play again</button>
+    <div><button class="link-btn" id="menu-btn">Back to menu</button></div>
     <div class="board-wrap">
       <h2>Leaderboard</h2>
       <ol class="board" id="board-over"></ol>
