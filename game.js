@@ -302,6 +302,7 @@ const keys = new Set();
 addEventListener('keydown', (e) => {
   if (['ArrowLeft', 'ArrowRight', 'a', 'd', 'A', 'D'].includes(e.key)) { keys.add(e.key.toLowerCase()); e.preventDefault(); }
   if ((e.key === 'Enter' || e.key === ' ') && state.mode !== 'play') { e.preventDefault(); startGame(); }
+  if (e.key === 'Escape' && state.mode !== 'menu') { e.preventDefault(); goToMenu(); }
 });
 addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
 
@@ -314,7 +315,7 @@ canvas.addEventListener('pointerleave', () => { pointerX = null; });
 function startGame() {
   Object.assign(state, { mode: 'play', x: W / 2, vx: 0, items: [], pops: [], puffs: 0, lives: 3, streak: 0, bestStreak: 0, time: 0, spawnIn: 0.6, hurt: 0 });
   pointerX = null;
-  $('start-panel').hidden = true; $('over-panel').hidden = true; $('hud').hidden = false;
+  $('start-panel').hidden = true; $('over-panel').hidden = true; $('hud').hidden = false; $('quit-btn').hidden = false;
   updateHud();
   beep(520, 0.1, 'square', 0.08, 1.5);
 }
@@ -436,6 +437,7 @@ document.addEventListener('visibilitychange', () => { last = performance.now(); 
 // ---------- game over, saving and the leaderboard ----------
 async function endGame() {
   state.mode = 'over';
+  $('quit-btn').hidden = true;
   state.items = []; state.pops = [];
   $('hud').hidden = true;
   $('final-puffs').textContent = state.puffs;
@@ -484,6 +486,16 @@ async function loadBoard(id) {
   }
 }
 
+// Leave a run (or the game-over screen) and go back to the start screen. A quit run isn't saved.
+function goToMenu() {
+  Object.assign(state, { mode: 'menu', items: [], pops: [], moving: false });
+  keys.clear(); pointerX = null;
+  $('hud').hidden = true; $('quit-btn').hidden = true; $('over-panel').hidden = true;
+  $('start-panel').hidden = false;
+  loadBoard('board-start');
+}
+$('quit-btn').onclick = goToMenu;
+$('menu-btn').onclick = goToMenu;
 $('play-btn').onclick = startGame;
 $('again-btn').onclick = startGame;
 
