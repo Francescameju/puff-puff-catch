@@ -41,8 +41,24 @@ const FALLBACK_GUEST = {
   face: null,
 };
 
+// Backup sign-in: after signing in, start.ng sends players back with a game session in
+// the address. Some browsers (Safari, Brave, strict privacy settings) hide the start.ng
+// sign-in from the connect page, so we keep this session and use the HTTP API with it.
+const API = 'https://api.start.ng';
+const GAME = location.hostname.endsWith('.start.ng') ? location.hostname.split('.')[0] : 'puff-puff-catch';
+{
+  const params = new URLSearchParams(location.hash.slice(1));
+  if (params.get('startng_session')) {
+    try { sessionStorage.setItem('startng_session', params.get('startng_session')); } catch {}
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+}
+function getSession() { try { return sessionStorage.getItem('startng_session'); } catch { return null; } }
+function dropSession() { try { sessionStorage.removeItem('startng_session'); } catch {} }
+
 const StartNg = {
-  user: null,          // signed-in player, or null
+  user: null,             // signed-in player, or null
+  via: null,              // how they're signed in: 'connect' or 'api'
   player: FALLBACK_GUEST, // who we draw: the user, or the guest look
   onChange: () => {},
 
@@ -52,11 +68,33 @@ const StartNg = {
 
   async refresh() {
     const reply = await askStartNg({ type: 'startng:whoami' }, 'startng:user');
-    if (!reply) { this.renderCard(); return; } // start.ng didn't answer: keep what we have
-    this.user = reply.user ?? null;
-    this.player = reply.user ?? reply.guest ?? FALLBACK_GUEST;
+    const guest = reply?.guest ?? FALLBACK_GUEST;
+
+    if (reply?.user) {
+      this.user = reply.user; this.via = 'connect'; this.player = reply.user;
+    } else if (getSession()) {
+      // The connect page didn't see a sign-in: try the session instead.
+      const p = await this.playerFromSession();
+      if (p) {
+        this.user = { id: p.id, name: p.name, account: null, style: p.style, face: null };
+        this.via = 'api';
+        this.player = { name: p.name, style: p.style || guest.style, face: null };
+      } else if (reply) {
+        this.user = null; this.via = null; this.player = guest;
+      }
+    } else if (reply) {
+      this.user = null; this.via = null; this.player = guest;
+    }
     this.renderCard();
     this.onChange();
+  },
+
+  async playerFromSession() {
+    try {
+      const res = await fetch(`${API}/games/${GAME}/player`, { headers: { Authorization: `Bearer ${getSession()}` } });
+      if (res.status === 401) { dropSession(); return null; }
+      return res.ok ? await res.json() : null;
+    } catch { return null; }
   },
 
   renderCard() {
@@ -65,7 +103,8 @@ const StartNg = {
     face.hidden = !p.face;
     if (p.face) face.src = p.face;
     document.getElementById('player-name').textContent = p.name || 'Guest';
-    document.getElementById('player-account').textContent = this.user?.account ? `@${this.user.account}` : 'Not signed in';
+    document.getElementById('player-account').textContent =
+      this.user?.account ? `@${this.user.account}` : this.user ? 'Signed in' : 'Not signed in';
     const btn = document.getElementById('player-sign-in');
     btn.hidden = !!this.user;
     btn.onclick = () => (location.href = this.signInUrl());
@@ -75,22 +114,36 @@ const StartNg = {
   // Save a finished run. Only signed-in players can save.
   async saveRun(stats) {
     if (!this.user) return { ok: false, error: 'guest' };
-    const reply = await askStartNg({ type: 'startng:score', stats }, 'startng:scoreSaved', 8000);
-    return reply ?? { ok: false, error: 'Could not reach start.ng' };
+    if (this.via === 'connect') {
+      const reply = await askStartNg({ type: 'startng:score', stats }, 'startng:scoreSaved', 8000);
+      if (reply?.ok || !getSession()) return reply ?? { ok: false, error: 'Could not reach start.ng' };
+    }
+    // HTTP API with the game session
+    try {
+      const res = await fetch(`${API}/games/${GAME}/scores`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getSession()}` },
+        body: JSON.stringify({ stats }),
+      });
+      if (res.ok) return { ok: true, result: await res.json() };
+      if (res.status === 401) {
+        dropSession(); this.user = null; this.via = null; this.renderCard();
+        return { ok: false, error: 'Your sign-in expired. Sign in again to save.' };
+      }
+      return { ok: false, error: 'start.ng did not accept this run.' };
+    } catch { return { ok: false, error: 'Could not reach start.ng' }; }
   },
 
   async leaderboard(limit = 10) {
-    const reply = await askStartNg({ type: 'startng:leaderboard', limit }, 'startng:leaderboardData', 8000);
-    return reply?.ok ? reply.entries : null;
+    const reply = await askStartNg({ type: 'startng:leaderboard', limit }, 'startng:leaderboardData', 5000);
+    if (reply?.ok) return reply.entries;
+    try {
+      const res = await fetch(`${API}/games/${GAME}/leaderboard?limit=${limit}`);
+      return res.ok ? await res.json() : null;
+    } catch { return null; }
   },
 };
 
 // Players may sign in or out on start.ng in another tab: ask again when they come back.
 document.addEventListener('visibilitychange', () => { if (!document.hidden) StartNg.refresh(); });
 addEventListener('focus', () => StartNg.refresh());
-
-// After signing in, start.ng sends players back with a session in the address.
-// We use the connect page instead, so just clean the address bar.
-if (location.hash.includes('startng_session=')) {
-  history.replaceState(null, '', location.pathname + location.search);
-}
